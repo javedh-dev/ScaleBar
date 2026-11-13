@@ -1,0 +1,92 @@
+name: Release
+
+# Actions → Release → Run workflow → pick the bump. .version is the source of truth:
+# bumps it, builds, and only if the build passes commits "Release vX.Y.Z", tags it and publishes the release.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Version bump (none = release the current .version as is)"
+        type: choice
+        options: [patch, minor, major, none]
+        default: patch
+
+permissions:
+  contents: write
+
+concurrency: release
+
+jobs:
+  release:
+    runs-on: macos-latest
+    env:
+      HAS_CERT: ${{ secrets.SIGNING_P12 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version
+        id: v
+        env:
+          BUMP: ${{ inputs.bump }}
+        run: |
+          IFS=. read -r MA MI PA < .version
+          case "$BUMP" in
+            major) MA=$((MA + 1)); MI=0; PA=0 ;;
+            minor) MI=$((MI + 1)); PA=0 ;;
+            patch) PA=$((PA + 1)) ;;
+          esac
+          V="$MA.$MI.$PA"
+          if git rev-parse -q --verify "refs/tags/v$V" >/dev/null; then
+            echo "::error::v$V already exists. Pick a bigger bump."; exit 1
+          fi
+          echo "$V" > .version
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
+      # Optional: sign with a stable certificate (see scripts/make-cert.sh --ci), so users keep their
+      # Accessibility permission across updates. Without it, releases are ad-hoc signed.
+      - name: Import signing certificate
+        if: env.HAS_CERT == 'true'
+        env:
+          SIGNING_P12: ${{ secrets.SIGNING_P12 }}
+          SIGNING_P12_PASSWORD: ${{ secrets.SIGNING_P12_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/signing.keychain-db" KP=$(openssl rand -hex 16)
+          echo "$SIGNING_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KP" "$KC"
+          security set-keychain-settings -lut 3600 "$KC"
+          security unlock-keychain -p "$KP" "$KC"
+          security import "$RUNNER_TEMP/cert.p12" -k "$KC" -P "$SIGNING_P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KP" "$KC" >/dev/null
+          security list-keychains -d user -s "$KC" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/cert.p12"
+
+      - name: Build
+        env:
+          SCALEBAR_REPO: ${{ github.repository }}
+        run: scripts/build.sh
+
+      - name: Package
+        env:
+          V: ${{ steps.v.outputs.version }}
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/ScaleBar.app "dist/ScaleBar-$V.zip"
+          (cd dist && shasum -a 256 "ScaleBar-$V.zip" > "ScaleBar-$V.zip.sha256")
+
+      - name: Commit, tag and publish
+        env:
+          V: ${{ steps.v.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet .version; then
+            git commit -m "Release v$V" .version
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+          git tag -a "v$V" -m "ScaleBar $V"
+          git push origin "v$V"
+          gh release create "v$V" dist/* --title "ScaleBar $V" --generate-notes --notes \
+            "Download **ScaleBar-$V.zip**, unzip, move ScaleBar.app to /Applications. First launch: right-click → Open (the app isn't notarized). Checksum: ScaleBar-$V.zip.sha256."
