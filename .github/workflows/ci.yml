@@ -14,4 +14,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build and self-test
-        run: scripts/build.sh
+        run: Scripts/build.sh

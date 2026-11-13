@@ -33,14 +33,14 @@ extension App {
             DispatchQueue.main.async {
                 // Only ever open a page on this repo's GitHub releases.
                 guard let tag, let page, page.absoluteString.lowercased().hasPrefix("https://github.com/\(repo.lowercased())/releases/") else {
-                    self.updateText = code == 404 ? "No releases published yet." : "⚠︎ Couldn't check for updates. Are you offline?"
-                    if manual { self.alert(self.updateText) }
+                    self.updateText = code == 404 ? "" : "Couldn't check for updates. Are you offline?"
+                    if manual { self.alert(code == 404 ? "No releases have been published yet." : self.updateText) }
                     return self.updateSettings()
                 }
                 UserDefaults.standard.set(Date(), forKey: "lastUpdateCheck")
                 if newer(tag, than: appVersion) {
                     self.update = (tag, page)
-                    self.updateText = "ScaleBar \(tag) is available. It's also in the menu bar menu."
+                    self.updateText = "Version \(tag) is available. See the menu bar menu."
                     if manual {
                         NSApp.activate(ignoringOtherApps: true)
                         let a = NSAlert()
@@ -51,8 +51,8 @@ extension App {
                     }
                 } else {
                     self.update = nil
-                    self.updateText = "You're up to date (\(appVersion))."
-                    if manual { self.alert(self.updateText) }
+                    self.updateText = ""
+                    if manual { self.alert("You're up to date (\(appVersion)).") }
                 }
                 self.updateSettings()
             }

@@ -75,11 +75,15 @@ extension App {
     func showHUD(_ symbol: String, _ step: Int) {
         let p = hud ?? {
             let p = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 200, height: 200), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
-            (p.level, p.isOpaque, p.backgroundColor, p.ignoresMouseEvents) = (.statusBar, false, .clear, true)
+            (p.level, p.isOpaque, p.backgroundColor, p.ignoresMouseEvents, p.hasShadow) = (.statusBar, false, .clear, true, false)
             p.collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary]
             let fx = NSVisualEffectView(frame: p.contentView!.bounds)
-            (fx.material, fx.state, fx.wantsLayer) = (.hudWindow, .active, true)
-            fx.layer?.cornerRadius = 18
+            (fx.material, fx.state) = (.hudWindow, .active)
+            // A mask, not layer.cornerRadius: the blur only clips cleanly to a mask. The window itself is square,
+            // so its shadow is off; otherwise it shows as a light square halo around the rounded corners.
+            fx.maskImage = NSImage(size: NSSize(width: 200, height: 200), flipped: false) { r in
+                NSBezierPath(roundedRect: r, xRadius: 18, yRadius: 18).fill(); return true
+            }
             p.contentView = fx
             hud = p
             return p

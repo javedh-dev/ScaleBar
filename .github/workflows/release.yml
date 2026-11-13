@@ -44,7 +44,7 @@ jobs:
           echo "$V" > .version
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
-      # Optional: sign with a stable certificate (see scripts/make-cert.sh --ci), so users keep their
+      # Optional: sign with a stable certificate (see Scripts/make-cert.sh --ci), so users keep their
       # Accessibility permission across updates. Without it, releases are ad-hoc signed.
       - name: Import signing certificate
         if: env.HAS_CERT == 'true'
@@ -65,7 +65,7 @@ jobs:
       - name: Build
         env:
           SCALEBAR_REPO: ${{ github.repository }}
-        run: scripts/build.sh
+        run: Scripts/build.sh
 
       - name: Package
         env:

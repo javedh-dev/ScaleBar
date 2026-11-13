@@ -24,7 +24,7 @@ done
 if security find-identity -p codesigning | grep -q "ScaleBar Local"; then
     codesign -s "ScaleBar Local" --force "$A"
 else
-    echo "note: no 'ScaleBar Local' certificate (run scripts/make-cert.sh once); signing ad-hoc"
+    echo "note: no 'ScaleBar Local' certificate (run Scripts/make-cert.sh once); signing ad-hoc"
     codesign -s - --force "$A"
 fi
 "$A/Contents/MacOS/ScaleBar" --selftest

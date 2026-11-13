@@ -9,8 +9,6 @@ import Cocoa
 // Failsafe: the virtual display belongs to this process. If ScaleBar quits or crashes, macOS removes it and the
 // real display goes back to normal. Mirroring is applied .forSession only, so nothing sticks past logout.
 
-let author = "Javed"
-
 final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     var labels: [CGDirectDisplayID: (value: NSTextField, detail: NSTextField)] = [:]

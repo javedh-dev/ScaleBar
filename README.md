@@ -53,12 +53,12 @@ ScaleBar checks GitHub once a day for a new version and lets you know. It never 
 
 ## What works where
 
-| | Needs |
-|---|---|
-| Scale slider | macOS 14 or later |
-| In-between sizes (1.25x, 1.5x, …) | macOS 14 or later |
-| Brightness and volume | Apple Silicon Mac, with DDC/CI turned on in the monitor's menu |
-| Keyboard keys | Accessibility permission, plus brightness and volume working |
+|                                   | Needs                                                          |
+| --------------------------------- | -------------------------------------------------------------- |
+| Scale slider                      | macOS 14 or later                                              |
+| In-between sizes (1.25x, 1.5x, …) | macOS 14 or later                                              |
+| Brightness and volume             | Apple Silicon Mac, with DDC/CI turned on in the monitor's menu |
+| Keyboard keys                     | Accessibility permission, plus brightness and volume working   |
 
 Brightness and volume work over USB-C and DisplayPort on most monitors. Some docks, adapters and the built-in HDMI port on certain Macs don't pass the signal through. ScaleBar will tell you if that's the case.
 
@@ -89,8 +89,8 @@ They're great, and do much more. ScaleBar does fewer things: a scale slider plus
 
 ```sh
 git clone https://github.com/javedh-dev/ScaleBar.git && cd ScaleBar
-scripts/make-cert.sh   # once: a local signing certificate, so macOS remembers the Accessibility permission
-scripts/build.sh       # builds build/ScaleBar.app and runs a quick self-test
+Scripts/make-cert.sh   # once: a local signing certificate, so macOS remembers the Accessibility permission
+Scripts/build.sh       # builds build/ScaleBar.app and runs a quick self-test
 open build/ScaleBar.app
 ```
 
@@ -105,7 +105,7 @@ Sources/ScaleBar/
   UI/         Menu.swift (menu and scale slider), Settings.swift (Settings, About), Icon.swift (icons, drawn in code)
   ScaleBar-Bridging-Header.h   macOS APIs Apple doesn't publish
 Resources/    Info.plist
-scripts/      build.sh, make-cert.sh
+Scripts/      build.sh, make-cert.sh
 .github/      workflows (CI, Release), assets (README images)
 .version      current version
 ```
@@ -116,11 +116,11 @@ Releases are built by GitHub Actions. `.version` holds the current version.
 
 - Every push and pull request is built and tested by **CI**.
 - To ship a version, open **Actions → Release → Run workflow** and pick `patch`, `minor` or `major` (or `none` to ship `.version` as it is). The workflow builds and tests the app. If that passes, it bumps `.version`, tags the commit and publishes the release with the zip and its checksum.
-- Optional but recommended: run `scripts/make-cert.sh --ci` once and add the two secrets it prints. Every release is then signed with the same certificate, so users don't have to grant Accessibility again after each update.
+- Optional but recommended: run `Scripts/make-cert.sh --ci` once and add the two secrets it prints. Every release is then signed with the same certificate, so users don't have to grant Accessibility again after each update.
 
 ## How it was made
 
-The code was written with [Claude](https://claude.ai), Anthropic's AI assistant. Javed designed the app, steered every change, and tested it on real monitors.
+The code was written with [Claude](https://claude.ai), Anthropic's AI assistant. Humans designed the app, steered every change, and tested it on real monitors.
 
 ## Thanks
 
@@ -128,4 +128,4 @@ ScaleBar learned a lot from [BetterDisplay](https://github.com/waydabber/BetterD
 
 ## License
 
-MIT © Javed
+MIT © Javed Hussain

@@ -2,9 +2,9 @@
 # Self-signed code-signing certificate "ScaleBar Local", so the Accessibility permission belongs to builds signed
 # with it (and survives rebuilds/updates), not to anything named "local.scalebar".
 #
-#   scripts/make-cert.sh        once per Mac: adds it to your login keychain for local builds.
+#   Scripts/make-cert.sh        once per Mac: adds it to your login keychain for local builds.
 #                         Undo: Keychain Access → login → delete "ScaleBar Local" (certificate + key).
-#   scripts/make-cert.sh --ci   makes a separate certificate for GitHub Actions release builds and prints the two
+#   Scripts/make-cert.sh --ci   makes a separate certificate for GitHub Actions release builds and prints the two
 #                         secrets to add (Settings → Secrets and variables → Actions). Nothing is kept on disk.
 set -e
 D=$(mktemp -d) && trap 'rm -rf "$D"' EXIT && umask 077
@@ -26,5 +26,5 @@ if [ "$1" = "--ci" ]; then
     fi
 else
     security import "$D/c.p12" -k ~/Library/Keychains/login.keychain-db -P "$P" -T /usr/bin/codesign
-    echo "Created. Now run scripts/build.sh"
+    echo "Created. Now run Scripts/build.sh"
 fi

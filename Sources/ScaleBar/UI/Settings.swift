@@ -4,7 +4,6 @@ import ServiceManagement
 extension App {
     // MARK: Settings & About
 
-
     @objc func showSettings() {
         if settings == nil { settings = makeSettings() }
         updateSettings()
@@ -16,78 +15,87 @@ extension App {
         let w = NSWindow(contentRect: .zero, styleMask: [.titled, .closable], backing: .buffered, defer: false)
         w.title = "ScaleBar Settings"
         w.isReleasedWhenClosed = false
-        func text(_ s: String, _ size: CGFloat, _ color: NSColor = .labelColor, bold: Bool = false) -> NSTextField {
+        func text(_ s: String, _ size: CGFloat, _ color: NSColor = .labelColor, weight: NSFont.Weight = .regular) -> NSTextField {
             let t = NSTextField(wrappingLabelWithString: s)
-            t.font = bold ? .boldSystemFont(ofSize: size) : .systemFont(ofSize: size)
-            t.textColor = color
-            t.preferredMaxLayoutWidth = 340
+            (t.font, t.textColor, t.preferredMaxLayoutWidth) = (.systemFont(ofSize: size, weight: weight), color, 300)
             return t
         }
-        func vstack(_ views: [NSView], _ spacing: CGFloat) -> NSStackView {
+        func stack(_ views: [NSView], _ spacing: CGFloat, vertical: Bool = true) -> NSStackView {
             let v = NSStackView(views: views)
-            (v.orientation, v.alignment, v.spacing) = (.vertical, .leading, spacing)
+            (v.orientation, v.alignment, v.spacing) = vertical ? (.vertical, .leading, spacing) : (.horizontal, .centerY, spacing)
             return v
-        }
-        // A checkbox bound to a pref, with a live status line under it.
-        func option(_ title: String, _ key: String, extra: [NSView] = []) -> NSView {
-            let cb = NSButton(checkboxWithTitle: title, target: self, action: #selector(toggle(_:)))
-            cb.identifier = NSUserInterfaceItemIdentifier(key)
-            cb.state = pref(key) ? .on : .off
-            let st = text("", 11, .secondaryLabelColor)
-            status[key] = st
-            return vstack([cb, st] + extra, 3)
         }
         func button(_ title: String, _ sel: Selector) -> NSButton {
             let b = NSButton(title: title, target: self, action: sel)
             (b.bezelStyle, b.controlSize) = (.rounded, .small)
             return b
         }
+        // A checkbox bound to a pref. The explanation is a tooltip; the line under it only appears for problems.
+        func option(_ title: String, _ key: String, help: String, trailing: [NSView] = [], below: [NSView] = []) -> NSView {
+            let cb = NSButton(checkboxWithTitle: title, target: self, action: #selector(toggle(_:)))
+            (cb.identifier, cb.state, cb.toolTip) = (NSUserInterfaceItemIdentifier(key), pref(key) ? .on : .off, help)
+            let note = text("", 11, .secondaryLabelColor)
+            status[key] = note
+            let indented = stack([note] + below, 4)
+            indented.edgeInsets = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0) // lines up with the checkbox title
+            return stack([stack([cb] + trailing, 8, vertical: false), indented], 2)
+        }
+        let section = { (s: String) in text(s, 11, .secondaryLabelColor, weight: .semibold) }
+
         let icon = NSImageView(image: NSApp.applicationIconImage)
-        icon.widthAnchor.constraint(equalToConstant: 48).isActive = true
-        icon.heightAnchor.constraint(equalToConstant: 48).isActive = true
-        let header = NSStackView(views: [icon, vstack([text("ScaleBar", 17, bold: true),
-                                                       text("Version \(appVersion)", 11, .secondaryLabelColor)], 2)])
-        header.spacing = 12
+        icon.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        let header = stack([icon, stack([text("ScaleBar", 15, weight: .semibold), text("Version \(appVersion)", 11, .secondaryLabelColor)], 1)], 10, vertical: false)
 
         let login = NSButton(checkboxWithTitle: "Launch at login", target: self, action: #selector(toggleLogin(_:)))
         loginBox = login
-        let loginStatus = text("", 11, .secondaryLabelColor)
-        status["login"] = loginStatus
+        let loginNote = text("", 11, .secondaryLabelColor)
+        status["login"] = loginNote
+        let loginIndented = stack([loginNote], 0)
+        loginIndented.edgeInsets = NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
         axButton = button("Open Accessibility Settings…", #selector(openAccessibility))
 
-        let section = { (s: String) in text(s.uppercased(), 10, .tertiaryLabelColor, bold: true) }
-        let stack = vstack([
-            header,
-            section("General"),
-            option("Show this window when ScaleBar starts", "showSettingsAtLaunch"),
-            vstack([login, loginStatus], 3),
-            section("Display"),
-            option("Use a virtual display for in-between scales", "virtualDisplay"),
-            section("Monitor control"),
-            option("Brightness & volume sliders (DDC/CI)", "ddc"),
-            option("Keyboard brightness & volume keys control the monitor", "keys", extra: [axButton!]),
-            section("Updates"),
-            option("Check for updates automatically", "autoUpdate", extra: [button("Check Now", #selector(checkNow))]),
-            NSStackView(views: [button("About ScaleBar", #selector(showAbout)), text("by \(author)", 10, .tertiaryLabelColor)]),
-        ], 10)
-        stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-        stack.setCustomSpacing(18, after: header)
-        stack.widthAnchor.constraint(equalToConstant: 400).isActive = true
-        w.contentView = stack
+        let about = NSButton(title: "About ScaleBar", target: self, action: #selector(showAbout))
+        (about.isBordered, about.font, about.contentTintColor) = (false, .systemFont(ofSize: 11), .linkColor)
+
+        let general = stack([
+            option("Show this window at startup", "showSettingsAtLaunch", help: "You can always open Settings from the menu bar icon."),
+            stack([login, loginIndented], 2),
+            option("Check for updates automatically", "autoUpdate", help: "Checks GitHub once a day. Nothing is downloaded or installed automatically.",
+                   trailing: [button("Check Now", #selector(checkNow))]),
+        ], 8)
+        let monitor = stack([
+            option("Virtual display for in-between scales", "virtualDisplay",
+                   help: "Gives sharp HiDPI at sizes the monitor doesn't offer (e.g. 1.5x on 1440p). The screen blanks briefly when switching in or out."),
+            option("Brightness and volume control", "ddc", help: "Controls the external monitor over DDC/CI. Needs DDC/CI turned on in the monitor's own menu."),
+            option("Brightness and volume keys", "keys", help: "Brightness keys work while the Mac's screen is off; volume keys while sound plays through the monitor. No other keys are read.",
+                   below: [axButton!]),
+        ], 8)
+
+        let content = stack([header, section("General"), general, section("Monitor"), monitor, about], 10)
+        content.setCustomSpacing(20, after: header)
+        content.setCustomSpacing(20, after: general)
+        content.setCustomSpacing(22, after: monitor)
+        content.edgeInsets = NSEdgeInsets(top: 20, left: 22, bottom: 16, right: 22)
+        content.widthAnchor.constraint(equalToConstant: 380).isActive = true
+        w.contentView = content
         w.center()
         return w
     }
 
-    // Refreshes every status line; cheap, so it's called whenever anything changes.
+    // Refreshes the problem lines; cheap, so it's called whenever anything changes.
     func updateSettings() {
         guard let w = settings else { return }
-        func set(_ k: String, _ s: String) { status[k]?.stringValue = s; status[k]?.isHidden = s.isEmpty }
-        set("virtualDisplay", !virtualSupported ? "⚠︎ Not supported on this version of macOS. Only the display's own modes are offered."
-            : pref("virtualDisplay") ? "Scales the display doesn't offer itself (e.g. 1.25x, 1.5x on a 1440p monitor) use a mirrored virtual HiDPI display. The screen blanks briefly when switching in or out."
-            : "Off: only the display's own modes are offered.")
+        // Hides an empty note, and its indented row when nothing in it is visible.
+        func set(_ k: String, _ s: String) {
+            guard let note = status[k] else { return }
+            (note.stringValue, note.isHidden) = (s, s.isEmpty)
+            if let row = note.superview as? NSStackView { row.isHidden = row.arrangedSubviews.allSatisfy(\.isHidden) }
+        }
+        axButton?.isHidden = !(pref("keys") && !AXIsProcessTrusted())
+        set("virtualDisplay", virtualSupported ? "" : "Not supported on this version of macOS.")
         set("ddc", ddcStatus())
         set("keys", keysStatus())
-        axButton?.isHidden = !(pref("keys") && !AXIsProcessTrusted())
         set("autoUpdate", updateText)
         let ls = SMAppService.mainApp.status
         loginBox?.state = ls == .enabled ? .on : .off
@@ -100,23 +108,23 @@ extension App {
         }
     }
 
+    // Empty when everything is fine or the feature is off; otherwise a short reason.
     func ddcStatus() -> String {
-        guard pref("ddc") else { return "Off." }
-        guard ddcSupported else { return "⚠︎ Not supported on this version of macOS." }
-        if externals == 0 { return "Connect an external monitor to control its brightness and volume." }
-        if avService() == nil { return "⚠︎ Can't reach the monitor's controls from this Mac or port. Needs Apple Silicon; some built-in HDMI ports and docks don't pass DDC/CI." }
-        if externals > 1 { return "⚠︎ Works with one external monitor at a time." }
-        if ddcValues.isEmpty { return ddcGaveUp ? "⚠︎ The monitor didn't respond. Turn on DDC/CI in its on-screen menu. Some docks and adapters block it." : "Checking the monitor…" }
-        return "Monitor: " + (ddcValues[0x10] != nil ? "brightness ✓" : "brightness not supported") + ", "
-            + (ddcValues[0x62] != nil ? "volume ✓" : "volume not supported (no speakers?)") + "."
+        guard pref("ddc"), externals > 0 else { return "" }
+        if !ddcSupported || avService() == nil { return "Not available on this Mac or port. Needs Apple Silicon; some HDMI ports and docks block it." }
+        if externals > 1 { return "Works with one external monitor at a time." }
+        if ddcValues.isEmpty { return ddcGaveUp ? "The monitor didn't respond. Turn on DDC/CI in its on-screen menu." : "" }
+        if ddcValues[0x10] == nil { return "This monitor doesn't support brightness control." }
+        if ddcValues[0x62] == nil { return "This monitor doesn't support volume control." }
+        return ""
     }
 
     func keysStatus() -> String {
-        guard pref("keys") else { return "Off: the keys control the Mac as usual." }
-        if !pref("ddc") { return "⚠︎ Needs \"Brightness & volume sliders\" turned on." }
-        if !AXIsProcessTrusted() { return "⚠︎ Needs Accessibility permission to see the brightness and volume keys." }
-        if keyTap == nil { return "⚠︎ Couldn't listen to the keyboard. Quit and reopen ScaleBar." }
-        return "Brightness keys control the monitor while the Mac's own screen is off; volume keys while sound plays through the monitor. No other keys are read."
+        guard pref("keys") else { return "" }
+        if !pref("ddc") { return "Needs brightness and volume control turned on." }
+        if !AXIsProcessTrusted() { return "Needs Accessibility permission." }
+        if keyTap == nil { return "Couldn't listen to the keyboard. Quit and reopen ScaleBar." }
+        return ""
     }
 
     @objc func toggle(_ b: NSButton) {
@@ -137,7 +145,7 @@ extension App {
             if b.state == .on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
             loginError = ""
         } catch {
-            loginError = "⚠︎ Couldn't change it: \(error.localizedDescription) Moving ScaleBar to /Applications usually helps."
+            loginError = "Couldn't change it. Moving ScaleBar to Applications usually helps."
         }
         updateSettings()
     }
