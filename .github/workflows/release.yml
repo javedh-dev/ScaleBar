@@ -21,6 +21,7 @@ jobs:
     runs-on: macos-latest
     env:
       HAS_CERT: ${{ secrets.SIGNING_P12 != '' }}
+      HAS_TAP: ${{ secrets.TAP_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -90,3 +91,24 @@ jobs:
           git push origin "v$V"
           gh release create "v$V" dist/* --title "ScaleBar $V" --generate-notes --notes \
             "Download **ScaleBar-$V.zip**, unzip, move ScaleBar.app to /Applications. First launch: right-click → Open (the app isn't notarized). Checksum: ScaleBar-$V.zip.sha256."
+
+      # Optional: keep Casks/scalebar.rb in <owner>/homebrew-tap current. Needs a TAP_TOKEN secret: a fine-grained
+      # token with "Contents: Read and write" on the homebrew-tap repo only.
+      - name: Update Homebrew tap
+        if: env.HAS_TAP == 'true'
+        env:
+          V: ${{ steps.v.outputs.version }}
+          TAP_TOKEN: ${{ secrets.TAP_TOKEN }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.repository }}
+        run: |
+          SHA=$(cut -d' ' -f1 "dist/ScaleBar-$V.zip.sha256")
+          TAP="$RUNNER_TEMP/homebrew-tap"
+          git clone --depth 1 "https://x-access-token:$TAP_TOKEN@github.com/$OWNER/homebrew-tap.git" "$TAP"
+          mkdir -p "$TAP/Casks"
+          Scripts/make-cask.sh "$V" "$SHA" "$REPO" > "$TAP/Casks/scalebar.rb"
+          cd "$TAP"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/scalebar.rb
+          git diff --cached --quiet || { git commit -m "scalebar $V"; git push; }

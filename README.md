@@ -44,6 +44,16 @@ ScaleBar gives you proper HiDPI at the in-between sizes too: 1.25x, 1.5x and 1.7
 
 ## Install
 
+### Homebrew
+
+```sh
+brew install --cask javedh-dev/tap/scalebar
+```
+
+Updates come with `brew upgrade`, and macOS won't show the first-launch warning. For the brightness and volume keys, allow Accessibility as in step 4 below.
+
+### Download
+
 1. Download the latest **ScaleBar-x.y.z.zip** from [Releases](../../releases/latest).
 2. Unzip it and drag **ScaleBar.app** into **Applications**.
 3. The first time you open it, right-click the app and choose **Open**. It's free and not notarized by Apple, so macOS asks once.
