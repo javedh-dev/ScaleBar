@@ -118,6 +118,10 @@ Releases are built by GitHub Actions. `.version` holds the current version.
 - To ship a version, open **Actions → Release → Run workflow** and pick `patch`, `minor` or `major` (or `none` to ship `.version` as it is). The workflow builds and tests the app. If that passes, it bumps `.version`, tags the commit and publishes the release with the zip and its checksum.
 - Optional but recommended: run `scripts/make-cert.sh --ci` once and add the two secrets it prints. Every release is then signed with the same certificate, so users don't have to grant Accessibility again after each update.
 
+## How it was made
+
+The code was written with [Claude](https://claude.ai), Anthropic's AI assistant. Javed designed the app, steered every change, and tested it on real monitors.
+
 ## Thanks
 
 ScaleBar learned a lot from [BetterDisplay](https://github.com/waydabber/BetterDisplay), [MonitorControl](https://github.com/MonitorControl/MonitorControl), [m1ddc](https://github.com/waydabber/m1ddc) and [DeskPad](https://github.com/Stengo/DeskPad).

@@ -46,7 +46,7 @@ extension App {
         icon.widthAnchor.constraint(equalToConstant: 48).isActive = true
         icon.heightAnchor.constraint(equalToConstant: 48).isActive = true
         let header = NSStackView(views: [icon, vstack([text("ScaleBar", 17, bold: true),
-                                                       text("Version \(appVersion) · Made by \(author)", 11, .secondaryLabelColor)], 2)])
+                                                       text("Version \(appVersion)", 11, .secondaryLabelColor)], 2)])
         header.spacing = 12
 
         let login = NSButton(checkboxWithTitle: "Launch at login", target: self, action: #selector(toggleLogin(_:)))
@@ -68,7 +68,7 @@ extension App {
             option("Keyboard brightness & volume keys control the monitor", "keys", extra: [axButton!]),
             section("Updates"),
             option("Check for updates automatically", "autoUpdate", extra: [button("Check Now", #selector(checkNow))]),
-            button("About ScaleBar", #selector(showAbout)),
+            NSStackView(views: [button("About ScaleBar", #selector(showAbout)), text("by \(author)", 10, .tertiaryLabelColor)]),
         ], 10)
         stack.edgeInsets = NSEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         stack.setCustomSpacing(18, after: header)
@@ -150,7 +150,7 @@ extension App {
         NSApp.activate(ignoringOtherApps: true)
         NSApp.orderFrontStandardAboutPanel(options: [
             .applicationName: "ScaleBar",
-            .credits: NSAttributedString(string: "Made by \(author)\nSharp display scaling, brightness and volume for macOS.",
+            .credits: NSAttributedString(string: "Sharp display scaling, brightness and volume for macOS.",
                                          attributes: [.font: NSFont.systemFont(ofSize: 11), .foregroundColor: NSColor.secondaryLabelColor]),
         ])
     }
