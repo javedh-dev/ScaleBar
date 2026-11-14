@@ -19,6 +19,13 @@
 	<string>0.0.0</string>
 	<key>ScaleBarRepo</key>
 	<string></string>
+	<!-- Usage count endpoint and signed key: filled in by Scripts/build.sh from TALLYMOTH_URL/KEY/SECRET. Empty = off. -->
+	<key>TallymothURL</key>
+	<string></string>
+	<key>TallymothKey</key>
+	<string></string>
+	<key>TallymothSecret</key>
+	<string></string>
 	<key>NSHumanReadableCopyright</key>
 	<string>© 2026 Javed Hussain</string>
 	<key>LSMinimumSystemVersion</key>

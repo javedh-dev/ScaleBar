@@ -63,6 +63,8 @@ extension App {
             stack([login, loginIndented], 2),
             option("Check for updates automatically", "autoUpdate", help: "Checks GitHub once a day. Nothing is downloaded or installed automatically.",
                    trailing: [button("Check Now", #selector(checkNow))]),
+            option("Help improve ScaleBar by sharing diagnostics", "telemetry", help: telemetryExplainer,
+                   below: [text("A daily anonymous active count (app version only) is always sent. Hover for details.", 11, .secondaryLabelColor), button("Privacy Policy…", #selector(openPrivacy))]),
         ], 8)
         let monitor = stack([
             option("Virtual display for in-between scales", "virtualDisplay",
@@ -139,6 +141,8 @@ extension App {
         }
         updateSettings()
     }
+
+    @objc func openPrivacy() { NSWorkspace.shared.open(privacyURL) }
 
     @objc func toggleLogin(_ b: NSButton) {
         do {

@@ -69,7 +69,7 @@ extension App {
             return CGVirtualDisplayMode(width: UInt(l.w * 2), height: UInt(l.h * 2), refreshRate: hz > 0 ? hz : 60)
         }
         UserDefaults.standard.set(true, forKey: "inFlight") // cleared once mirrored (or reverted)
-        guard let vd = CGVirtualDisplay(descriptor: d), vd.apply(st) else { return fail(k, "macOS refused the virtual display.") }
+        guard let vd = CGVirtualDisplay(descriptor: d), vd.apply(st) else { return fail(k, "virtual_refused", "macOS refused the virtual display.") }
         virtuals[k] = Virtual(vd, (native.pixelWidth, native.pixelHeight), s, real)
         mirror(k)
     }
@@ -85,7 +85,7 @@ extension App {
         let mirrored = CGDisplayMirrorsDisplay(v.real) == vid
         if modeOK && mirrored { v.tries = 0; UserDefaults.standard.removeObject(forKey: "inFlight"); return }
         v.tries += 1
-        guard v.tries <= 50 else { return fail(k, "Couldn't mirror onto the virtual display.") }
+        guard v.tries <= 50 else { return fail(k, "mirror_failed", "Couldn't mirror onto the virtual display.") }
         if let vm, let native = nativeMode(modes(v.real)), v.applied == 0 || v.tries - v.applied >= 10 {
             v.applied = v.tries
             // Two transactions: macOS rejects (1010) modes + mirror combined.
@@ -115,8 +115,9 @@ extension App {
         // Dropping the last reference to the CGVirtualDisplay removes it from the system.
     }
 
-    func fail(_ k: String, _ msg: String) {
+    func fail(_ k: String, _ kind: String, _ msg: String) {
         teardown(k)
+        report(kind, monitor: names[k])
         log.error("\(msg, privacy: .public)")
         UserDefaults.standard.removeObject(forKey: "inFlight")
         UserDefaults.standard.removeObject(forKey: "virtual." + k)
@@ -128,7 +129,7 @@ extension App {
         guard let v = virtuals[k], v.display === vd else { return }
         virtuals[k] = nil
         deaths += 1
-        if deaths > 3 { fail(k, "macOS keeps removing the virtual display.") } else { schedule() }
+        if deaths > 3 { fail(k, "virtual_removed", "macOS keeps removing the virtual display.") } else { schedule() }
     }
 
     func configure(_ body: (CGDisplayConfigRef?) -> Void) {
@@ -136,6 +137,6 @@ extension App {
         guard CGBeginDisplayConfiguration(&cfg) == .success else { return }
         body(cfg)
         let r = CGCompleteDisplayConfiguration(cfg, .forSession)
-        if r != .success { log.error("display config failed: \(r.rawValue, privacy: .public)"); CGCancelDisplayConfiguration(cfg) }
+        if r != .success { log.error("display config failed: \(r.rawValue, privacy: .public)"); report("display_config_failed", Int(r.rawValue)); CGCancelDisplayConfiguration(cfg) }
     }
 }

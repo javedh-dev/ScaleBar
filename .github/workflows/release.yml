@@ -66,6 +66,9 @@ jobs:
       - name: Build
         env:
           SCALEBAR_REPO: ${{ github.repository }}
+          TALLYMOTH_URL: ${{ secrets.TALLYMOTH_URL }}
+          TALLYMOTH_KEY: ${{ secrets.TALLYMOTH_KEY }}
+          TALLYMOTH_SECRET: ${{ secrets.TALLYMOTH_SECRET }}
         run: Scripts/build.sh
 
       - name: Package

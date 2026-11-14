@@ -1,0 +1,1286 @@
+{
+ "uid": "scalebar",
+ "title": "ScaleBar",
+ "tags": [
+  "scalebar"
+ ],
+ "schemaVersion": 39,
+ "version": 1,
+ "editable": true,
+ "time": {
+  "from": "now-30d",
+  "to": "now"
+ },
+ "refresh": "5m",
+ "templating": {
+  "list": [
+   {
+    "name": "ds",
+    "label": "Datasource",
+    "type": "datasource",
+    "query": "yesoreyeram-infinity-datasource",
+    "current": {},
+    "hide": 0
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "title": "Active installs (pings)",
+   "type": "stat",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "timeseries",
+     "url": "/v1/query?event=ping&step=1d&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "sum"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "graphMode": "area",
+    "colorMode": "value"
+   }
+  },
+  {
+   "id": 2,
+   "title": "Sharing diagnostics",
+   "type": "stat",
+   "gridPos": {
+    "x": 6,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "timeseries",
+     "url": "/v1/query?event=active&step=1d&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "sum"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "graphMode": "area",
+    "colorMode": "value"
+   }
+  },
+  {
+   "id": 3,
+   "title": "Failures",
+   "type": "stat",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 6,
+    "h": 4
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "timeseries",
+     "url": "/v1/query?event=failure&step=1d&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "sum"
+     ],
+     "fields": "",
+     "values": false
+    },
+    "graphMode": "area",
+    "colorMode": "value"
+   }
+  },
+  {
+   "id": 4,
+   "title": "Ping per day",
+   "type": "timeseries",
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "timeseries",
+     "url": "/v1/query?event=ping&step=1d&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 5,
+   "title": "Ping by ScaleBar version",
+   "type": "timeseries",
+   "gridPos": {
+    "x": 12,
+    "y": 4,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=ping&step=1d&group_by=version&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "version",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {},
+   "transformations": [
+    {
+     "id": "partitionByValues",
+     "options": {
+      "fields": [
+       "version"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 6,
+   "title": "macOS version",
+   "type": "table",
+   "gridPos": {
+    "x": 0,
+    "y": 12,
+    "w": 8,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=os&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "os",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "os": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 7,
+   "title": "Mac type",
+   "type": "table",
+   "gridPos": {
+    "x": 8,
+    "y": 12,
+    "w": 8,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=arch&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "arch",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "arch": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 8,
+   "title": "Screens",
+   "type": "table",
+   "gridPos": {
+    "x": 16,
+    "y": 12,
+    "w": 8,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=displays&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "displays",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "displays": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 9,
+   "title": "Virtual display on",
+   "type": "table",
+   "gridPos": {
+    "x": 0,
+    "y": 20,
+    "w": 8,
+    "h": 6
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=virtual&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "virtual",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "virtual": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 10,
+   "title": "Brightness/volume on",
+   "type": "table",
+   "gridPos": {
+    "x": 8,
+    "y": 20,
+    "w": 8,
+    "h": 6
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=ddc&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "ddc",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "ddc": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 11,
+   "title": "Keys on",
+   "type": "table",
+   "gridPos": {
+    "x": 16,
+    "y": 20,
+    "w": 8,
+    "h": 6
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=keys&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "keys",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "keys": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 12,
+   "title": "Country",
+   "type": "table",
+   "gridPos": {
+    "x": 0,
+    "y": 26,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=active&step=1d&group_by=country&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "country",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "country": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 13,
+   "title": "Failures per day",
+   "type": "timeseries",
+   "gridPos": {
+    "x": 12,
+    "y": 26,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "timeseries",
+     "url": "/v1/query?event=failure&step=1d&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {}
+  },
+  {
+   "id": 14,
+   "title": "Failures by kind",
+   "type": "timeseries",
+   "gridPos": {
+    "x": 0,
+    "y": 34,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=failure&step=1d&group_by=kind&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "kind",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {},
+   "transformations": [
+    {
+     "id": "partitionByValues",
+     "options": {
+      "fields": [
+       "kind"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 15,
+   "title": "Failures by monitor",
+   "type": "table",
+   "gridPos": {
+    "x": 12,
+    "y": 34,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=failure&step=1d&group_by=monitor&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "monitor",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "monitor": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "id": 16,
+   "title": "Failures by macOS version",
+   "type": "table",
+   "gridPos": {
+    "x": 0,
+    "y": 42,
+    "w": 12,
+    "h": 8
+   },
+   "datasource": {
+    "type": "yesoreyeram-infinity-datasource",
+    "uid": "${ds}"
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "yesoreyeram-infinity-datasource",
+      "uid": "${ds}"
+     },
+     "type": "json",
+     "source": "url",
+     "parser": "backend",
+     "format": "table",
+     "url": "/v1/query?event=failure&step=1d&group_by=version&from=${__from}&to=${__to}",
+     "url_options": {
+      "method": "GET",
+      "data": ""
+     },
+     "root_selector": "rows",
+     "columns": [
+      {
+       "selector": "t",
+       "text": "Time",
+       "type": "timestamp_epoch"
+      },
+      {
+       "selector": "group",
+       "text": "version",
+       "type": "string"
+      },
+      {
+       "selector": "value",
+       "text": "Count",
+       "type": "number"
+      }
+     ],
+     "filters": []
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "short"
+    },
+    "overrides": []
+   },
+   "options": {
+    "showHeader": true
+   },
+   "transformations": [
+    {
+     "id": "groupBy",
+     "options": {
+      "fields": {
+       "version": {
+        "operation": "groupby",
+        "aggregations": []
+       },
+       "Count": {
+        "operation": "aggregate",
+        "aggregations": [
+         "sum"
+        ]
+       }
+      }
+     }
+    },
+    {
+     "id": "sortBy",
+     "options": {
+      "sort": [
+       {
+        "field": "Count (sum)",
+        "desc": true
+       }
+      ]
+     }
+    }
+   ]
+  }
+ ]
+}

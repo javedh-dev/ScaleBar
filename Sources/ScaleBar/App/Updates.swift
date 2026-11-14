@@ -4,6 +4,7 @@ extension App {
     // MARK: Updates (GitHub Releases)
 
     func autoCheck() {
+        sendTelemetry()
         let last = UserDefaults.standard.object(forKey: "lastUpdateCheck") as? Date ?? .distantPast
         if pref("autoUpdate"), Date().timeIntervalSince(last) > 86_400 { checkForUpdates(manual: false) }
     }

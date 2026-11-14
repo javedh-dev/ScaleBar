@@ -15,7 +15,7 @@ iconutil -c icns "$T/AppIcon.iconset" -o "$A/Contents/Resources/AppIcon.icns"
 rm -rf "$T"
 
 cp Resources/Info.plist "$A/Contents/Info.plist"
-for kv in "CFBundleShortVersionString $VERSION" "CFBundleVersion $VERSION" "ScaleBarRepo $REPO"; do
+for kv in "CFBundleShortVersionString $VERSION" "CFBundleVersion $VERSION" "ScaleBarRepo $REPO" "TallymothURL ${TALLYMOTH_URL%/}" "TallymothKey $TALLYMOTH_KEY" "TallymothSecret $TALLYMOTH_SECRET"; do
     /usr/libexec/PlistBuddy -c "Set :${kv%% *} ${kv#* }" "$A/Contents/Info.plist"
 done
 

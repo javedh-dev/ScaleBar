@@ -72,6 +72,7 @@ extension App {
                 } else {
                     self.ddcChecking = false
                     self.ddcGaveUp = self.ddcValues.isEmpty
+                    if self.ddcGaveUp { self.report("ddc_no_response") }
                     self.updateSettings()
                 }
             }

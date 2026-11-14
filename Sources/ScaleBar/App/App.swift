@@ -47,8 +47,10 @@ final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
         if UserDefaults.standard.bool(forKey: "inFlight") {
             UserDefaults.standard.dictionaryRepresentation().keys.filter { $0.hasPrefix("virtual.") }.forEach(UserDefaults.standard.removeObject)
             UserDefaults.standard.removeObject(forKey: "inFlight")
+            report("crash_virtual_display")
             alert("ScaleBar stopped unexpectedly while setting up the virtual display last time, so it started in normal mode.")
         }
+        if !UserDefaults.standard.bool(forKey: "welcomed") { welcome() }
         reconcile()
         startKeyTap()
         if pref("showSettingsAtLaunch") { showSettings() }

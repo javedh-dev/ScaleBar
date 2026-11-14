@@ -34,7 +34,7 @@ extension App {
             }
             return Unmanaged.passUnretained(event)
         }, userInfo: nil)
-        guard let keyTap else { log.error("key tap could not be created"); return updateSettings() }
+        guard let keyTap else { log.error("key tap could not be created"); report("key_tap_failed"); return updateSettings() }
         CFRunLoopAddSource(CFRunLoopGetMain(), CFMachPortCreateRunLoopSource(nil, keyTap, 0), .commonModes)
         updateSettings()
     }

@@ -8,6 +8,8 @@ if CommandLine.arguments.contains("--selftest") {
     precondition(ddcParse(reply, 0x10)! == (50, 100) && ddcParse(Array(reply.dropFirst()) + [0], 0x10)! == (50, 100))
     precondition(newer("1.10", than: "1.9") && newer("2", than: "1.9.9") && !newer("1.0", than: "1.0.0") && !newer("1.0", than: "1.1"))
     precondition(ddcParse(reply, 0x62) == nil && ddcParse([UInt8](repeating: 0, count: 12), 0x10) == nil)
+    let t = tmSign(key: "k_test", secret: "tm_sk_test_secret", ts: "1763020800", body: Data(#"{"events":[{"name":"active"}]}"#.utf8), bits: 8, start: 0)
+    precondition(t.nonce == "352" && t.sig == "0000ac2a046f0231aabd836642ad818b64f1f9815bb31ae385a96df119407735")
     print("selftest ok")
     exit(0)
 }
