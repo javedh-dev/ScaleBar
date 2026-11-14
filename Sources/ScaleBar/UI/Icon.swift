@@ -33,7 +33,7 @@ func appIcon(_ px: Int) -> Data? {
     let s = CGFloat(px), inset = s * 100 / 1024 // macOS icon grid: 824pt squircle in a 1024 canvas
     let tile = NSRect(x: inset, y: inset, width: s - 2 * inset, height: s - 2 * inset)
     let shape = NSBezierPath(roundedRect: tile, xRadius: tile.width * 0.225, yRadius: tile.width * 0.225)
-    NSGradient(colors: [NSColor(red: 0.36, green: 0.33, blue: 0.95, alpha: 1), NSColor(red: 0.16, green: 0.72, blue: 0.86, alpha: 1)])?
+    NSGradient(colors: [NSColor(red: 0.04, green: 0.31, blue: 0.29, alpha: 1), NSColor(red: 0.16, green: 0.62, blue: 0.56, alpha: 1)])?
         .draw(in: shape, angle: -60)
     drawGlyph(in: tile.insetBy(dx: tile.width * 0.2, dy: tile.width * 0.2), .white, barAlpha: [0.7, 0.85, 1])
     NSGraphicsContext.restoreGraphicsState()
