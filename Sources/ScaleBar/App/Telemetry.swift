@@ -56,11 +56,14 @@ extension App {
             #endif
             let v = ProcessInfo.processInfo.operatingSystemVersion
             events.append(["name": "active", "props": ["version": appVersion, "os": "\(v.majorVersion).\(v.minorVersion)", "arch": arch,
-                "displays": NSScreen.screens.count, "virtual": pref("virtualDisplay") && virtualSupported,
-                "ddc": pref("ddc") && ddcSupported, "keys": pref("keys")]])
+                "displays": NSScreen.screens.count, "virtual": onOff(pref("virtualDisplay") && virtualSupported),
+                "ddc": onOff(pref("ddc") && ddcSupported), "keys": onOff(pref("keys"))]])
         }
         post(events) { UserDefaults.standard.set(Date(), forKey: "lastTelemetry") }
     }
+
+    // Text, not true/false: tallymoth's group_by (what the dashboard panels use) is only documented for text values.
+    func onOff(_ b: Bool) -> String { b ? "on" : "off" }
 
     // Only a fixed error name and number, at most once a day per kind. Nothing when diagnostics are off.
     // `monitor` is the marketing name macOS reports (e.g. "DELL U2723QE"), never a serial number. Defaults to the connected external monitors.
@@ -88,8 +91,13 @@ extension App {
             for (k, val) in [("Content-Type", "application/json"), ("X-TM-Key", key), ("X-TM-Timestamp", ts), ("X-TM-Nonce", s.nonce), ("X-TM-Signature", s.sig)] {
                 req.setValue(val, forHTTPHeaderField: k)
             }
-            URLSession.shared.dataTask(with: req) { _, resp, _ in
+            URLSession.shared.dataTask(with: req) { data, resp, _ in
                 let r = resp as? HTTPURLResponse
+                // 202 can still mean some events were rejected (unknown event, bad prop) or props dropped; 422 = none stored.
+                let reply = data.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+                if r?.statusCode != 202 || reply.contains("\"rejected\":[{") || reply.contains("\"dropped\":{\"") {
+                    log.error("telemetry \(r?.statusCode ?? 0, privacy: .public): \(reply.prefix(300), privacy: .public)")
+                }
                 if r?.statusCode == 202 { DispatchQueue.main.async { done?() } }
                 else if retry, r?.statusCode == 401, let want = r?.value(forHTTPHeaderField: "X-TM-Pow-Bits").flatMap({ Int($0) }), want > bits, want <= 22 {
                     DispatchQueue.global().async { send(bits: want, retry: false) } // server wants harder proof-of-work
