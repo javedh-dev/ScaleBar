@@ -31,11 +31,11 @@
 
 Plug a 1440p monitor into a Mac and you get two choices: text that's too small, or text that's blurry. macOS only renders HiDPI (Retina-quality) on these monitors at exactly 2x, which makes everything huge. Every size in between, like "looks like 2048×1152", gets stretched and looks soft.
 
-ScaleBar gives you proper HiDPI at the in-between sizes too: 1.25x, 1.5x and 1.75x. Text stays crisp, and you pick how big things look with one slider.
+ScaleBar gives you proper HiDPI at the in-between sizes too: 1.25x, 1.5x and 1.75x. Text stays crisp, and you pick how big things look from a row of boxes in the menu bar.
 
 ## Features
 
-- **One scale slider per display.** 1x to 3x in 0.25 steps. It uses the monitor's own modes when they exist, and a virtual HiDPI display for the sizes macOS won't give you.
+- **One row of scale boxes per display.** 1x up to a limit based on the display's resolution and physical size (UI never below ~60 points per inch) in 0.25 steps. It uses the monitor's own modes when they exist, and a virtual HiDPI display for the sizes macOS won't give you.
 - **Brightness and volume** for external monitors over DDC/CI, in the same 16 steps as the built-in keys.
 - **Your keyboard keys work again.** With the lid closed, the brightness keys control the monitor. When sound goes to the monitor, so do the volume keys. You get the familiar on-screen popup.
 - **Remembers each monitor.** Unplug, plug back in, and your scale comes back. A quick cable wiggle doesn't make the screen flash over and over.
@@ -65,7 +65,7 @@ ScaleBar checks GitHub once a day for a new version and lets you know. It never 
 
 |                                   | Needs                                                          |
 | --------------------------------- | -------------------------------------------------------------- |
-| Scale slider                      | macOS 14 or later                                              |
+| Scale list                        | macOS 14 or later                                              |
 | In-between sizes (1.25x, 1.5x, …) | macOS 14 or later                                              |
 | Brightness and volume             | Apple Silicon Mac, with DDC/CI turned on in the monitor's menu |
 | Keyboard keys                     | Accessibility permission, plus brightness and volume working   |
@@ -78,7 +78,7 @@ Brightness and volume work over USB-C and DisplayPort on most monitors. Some doc
 Usually you've picked a "scaled" size like 2048×1152 on a 1440p monitor. macOS draws it at that size and stretches it to fit the panel. Pick the same size in ScaleBar (1.25x) and it's rendered as HiDPI instead, so it stays crisp.
 
 **How do I turn on HiDPI for a 1440p or 1080p monitor on an M1, M2, M3 or M4 Mac?**
-On Apple Silicon, macOS ignores the old display-override trick. ScaleBar creates a virtual HiDPI display at the size you choose and mirrors your monitor from it. You don't need to set anything up; just move the slider.
+On Apple Silicon, macOS ignores the old display-override trick. ScaleBar creates a virtual HiDPI display at the size you choose and mirrors your monitor from it. You don't need to set anything up; just pick a scale.
 
 **Is 1.5x as sharp as 1x or 2x?**
 1x and 2x map pixels exactly. In-between sizes are drawn at double resolution and scaled down, which looks much better than macOS's normal scaling, but it isn't quite pixel-perfect.
@@ -93,7 +93,7 @@ macOS removes the virtual display and your monitor goes straight back to normal.
 It only reacts to the brightness and volume keys. Every other key goes straight through and is never stored or logged.
 
 **How is this different from BetterDisplay or MonitorControl?**
-They're great, and do much more. ScaleBar does fewer things: a scale slider plus brightness and volume, in a small, free, open-source app.
+They're great, and do much more. ScaleBar does fewer things: a scale picker plus brightness and volume, in a small, free, open-source app.
 
 ## Build it yourself
 
@@ -112,7 +112,7 @@ Sources/ScaleBar/
               Updates.swift (GitHub update check), Support.swift (small helpers)
   Display/    VirtualDisplay.swift (virtual HiDPI display and mirroring)
   Monitor/    DDC.swift (brightness and volume over DDC/CI), Keys.swift (keyboard keys, on-screen popup)
-  UI/         Menu.swift (menu and scale slider), Settings.swift (Settings, About), Icon.swift (icons, drawn in code)
+  UI/         Menu.swift (menu and scale boxes), Settings.swift (Settings, About), Icon.swift (icons, drawn in code)
   ScaleBar-Bridging-Header.h   macOS APIs Apple doesn't publish
 Resources/    Info.plist
 Scripts/      build.sh, make-cert.sh

@@ -1,6 +1,6 @@
 import Cocoa
 
-// One slider per display: scale 1x–3x in 0.25 stages. Scale = native width / looks-like width.
+// One row of scale boxes per display: scale 1x up to what the panel allows (see stages(forWidth:mm:)) in 0.25 stages. Scale = native width / looks-like width.
 // A stage uses a real mode when the display has one (1x native, plus macOS's own HiDPI sizes such as 2x).
 // Otherwise (externals only) it uses a virtual HiDPI display that the real display mirrors. macOS on Apple Silicon
 // ignores HiDPI override plists, so this is the only way to get e.g. 1.5x HiDPI on a 1440p panel.
@@ -11,7 +11,6 @@ import Cocoa
 
 final class App: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-    var labels: [CGDirectDisplayID: (value: NSTextField, detail: NSTextField)] = [:]
     var virtuals: [String: Virtual] = [:]
     var names: [String: String] = [:]
     var pending: DispatchWorkItem?

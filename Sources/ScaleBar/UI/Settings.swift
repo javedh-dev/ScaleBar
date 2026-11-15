@@ -74,7 +74,9 @@ extension App {
                    below: [axButton!]),
         ], 8)
 
-        let content = stack([header, section("General"), general, section("Monitor"), monitor, about], 10)
+        let reset = button("Reset Scaling to Default…", #selector(resetScaling))
+        reset.toolTip = "Puts every external monitor back on its native resolution and forgets saved scales."
+        let content = stack([header, section("General"), general, section("Monitor"), monitor, reset, about], 10)
         content.setCustomSpacing(20, after: header)
         content.setCustomSpacing(20, after: general)
         content.setCustomSpacing(22, after: monitor)
@@ -140,6 +142,26 @@ extension App {
         default: break
         }
         updateSettings()
+    }
+
+    // Built-in display is never touched: only externals are reset.
+    @objc func resetScaling() {
+        NSApp.activate(ignoringOtherApps: true)
+        let a = NSAlert()
+        a.messageText = "Reset scaling to default?"
+        a.informativeText = "Every external monitor goes back to its native resolution and saved scales are forgotten."
+        a.addButton(withTitle: "Reset"); a.addButton(withTitle: "Cancel")
+        guard a.runModal() == .alertFirstButtonReturn else { return }
+        UserDefaults.standard.dictionaryRepresentation().keys.filter { $0.hasPrefix("virtual.") }.forEach(UserDefaults.standard.removeObject)
+        virtuals.keys.forEach(teardown) // also puts those panels back on native
+        var ids = [CGDirectDisplayID](repeating: 0, count: 16), n: UInt32 = 0
+        CGGetOnlineDisplayList(16, &ids, &n)
+        for id in ids.prefix(Int(n)) where CGDisplayVendorNumber(id) != ourVendor && CGDisplayIsBuiltin(id) == 0 {
+            if let native = nativeMode(modes(id)), native.ioDisplayModeID != CGDisplayCopyDisplayMode(id)?.ioDisplayModeID {
+                configure { CGConfigureDisplayWithDisplayMode($0, id, native, nil) }
+            }
+        }
+        reconcile()
     }
 
     @objc func openPrivacy() { NSWorkspace.shared.open(privacyURL) }

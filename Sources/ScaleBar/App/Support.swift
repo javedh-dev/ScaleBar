@@ -16,6 +16,12 @@ func looks(_ w: Int, _ h: Int, _ s: Double) -> (w: Int, h: Int) {
 }
 
 let stages = Array(stride(from: 1.0, through: 3.0, by: 0.25))
+// Stages a panel supports: the UI never gets smaller than ~60 points per inch (4K 24" tops out at 3x, 1440p 32" at 1.5x).
+// Unknown physical size (mm 0 or absurd) falls back to a 1280-point-wide minimum.
+func stages(forWidth w: Int, mm: Double) -> [Double] {
+    let ppi = mm > 50 ? Double(w) / (mm / 25.4) : 0
+    return stages.filter { $0 == 1 || (ppi > 0 ? ppi / $0 >= 60 : Double(w) / $0 >= 1280) }
+}
 let appVersion = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "dev"
 
 // All settings default to on.

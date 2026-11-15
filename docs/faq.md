@@ -4,7 +4,7 @@
 Usually you've picked a "scaled" size like 2048×1152 on a 1440p monitor. macOS draws it at that size and stretches it to fit the panel. Pick the same size in ScaleBar (1.25x) and it's rendered as HiDPI instead, so it stays crisp.
 
 ## How do I turn on HiDPI for a 1440p or 1080p monitor on Apple Silicon?
-macOS ignores the old display-override trick on Apple Silicon. ScaleBar creates a virtual HiDPI display at the size you choose and mirrors your monitor from it. Just move the slider.
+macOS ignores the old display-override trick on Apple Silicon. ScaleBar creates a virtual HiDPI display at the size you choose and mirrors your monitor from it. Just pick a scale.
 
 ## Is 1.5x as sharp as 1x or 2x?
 1x and 2x map pixels exactly. In-between sizes are drawn at double resolution and scaled down, which looks much better than macOS's normal scaling, but isn't quite pixel-perfect.

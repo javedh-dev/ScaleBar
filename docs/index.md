@@ -14,8 +14,8 @@ hero:
     - { theme: alt, text: GitHub, link: https://github.com/javedh-dev/ScaleBar }
 
 features:
-  - title: One scale slider
-    details: 1x to 3x in 0.25 steps per display. Uses the monitor's own modes, or a virtual HiDPI display for the sizes macOS won't give you.
+  - title: One list of scales
+    details: 1x up to what your display's size and resolution suit, in 0.25 steps. Uses the monitor's own modes, or a virtual HiDPI display for the sizes macOS won't give you.
   - title: Brightness and volume
     details: Over DDC/CI, in the same 16 steps as the built-in keys. Your keyboard keys work again, with the familiar on-screen popup.
   - title: Remembers each monitor

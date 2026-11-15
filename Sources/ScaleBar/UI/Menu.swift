@@ -5,7 +5,6 @@ extension App {
 
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
-        labels = [:]
         ddcRows = [:]
         if let update {
             menu.addItem(withTitle: "Update available: ScaleBar \(update.version)…", action: #selector(openUpdate), keyEquivalent: "").target = self
@@ -15,7 +14,7 @@ extension App {
         var ids = [CGDirectDisplayID](repeating: 0, count: 16), n: UInt32 = 0
         CGGetOnlineDisplayList(16, &ids, &n)
         let shown = ids.prefix(Int(n)).filter {
-            CGDisplayVendorNumber($0) != ourVendor
+            CGDisplayVendorNumber($0) != ourVendor && CGDisplayIsBuiltin($0) == 0
                 && (CGDisplayMirrorsDisplay($0) == kCGNullDirectDisplay || ours.contains(CGDisplayMirrorsDisplay($0)))
         }
         let externals = shown.filter { CGDisplayIsBuiltin($0) == 0 }
@@ -24,34 +23,33 @@ extension App {
             if let note = ddcNote(), externals.contains(id), id == externals.last { menu.addItem(info(note)) }
             menu.addItem(.separator())
         }
+        if externals.isEmpty { menu.addItem(info("No external display connected")); menu.addItem(.separator()) }
         refreshDDC()
         menu.addItem(withTitle: "Settings…", action: #selector(showSettings), keyEquivalent: ",").target = self
-        menu.addItem(withTitle: "About ScaleBar", action: #selector(showAbout), keyEquivalent: "").target = self
         menu.addItem(withTitle: "Quit", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
     }
 
     func addDisplay(_ id: CGDirectDisplayID, to menu: NSMenu, ddc: Bool) {
-        guard let native = nativeMode(modes(id)), let cur = CGDisplayCopyDisplayMode(id) else { return }
+        guard let native = virtuals[displayKey(id)]?.panel ?? nativeMode(modes(id)), let cur = CGDisplayCopyDisplayMode(id) else { return }
         let v = virtuals[displayKey(id)]
         menu.addItem(.sectionHeader(title: screenName(id)))
 
-        let view = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 58))
-        let icon = NSImageView(image: NSImage(systemSymbolName: "textformat.size", accessibilityDescription: "Scale") ?? NSImage())
-        icon.frame = NSRect(x: 16, y: 18, width: 20, height: 20)
-        let slider = NSSlider(value: 1, minValue: 1, maxValue: 3, target: self, action: #selector(slide(_:)))
-        slider.frame = NSRect(x: 42, y: 16, width: 190, height: 24)
-        slider.numberOfTickMarks = 9
-        slider.allowsTickMarkValuesOnly = true
-        slider.tag = Int(id)
-        slider.doubleValue = v?.stage ?? (Double(native.pixelWidth) / Double(cur.width) * 4).rounded() / 4
-        slider.setAccessibilityLabel("Scale")
-        let value = small("\(slider.doubleValue.formatted())x", NSRect(x: 234, y: 20, width: 40, height: 16), 11)
-        let detail = small(v.map { virtualLabel(native, $0.stage) } ?? describe(cur), NSRect(x: 42, y: 42, width: 232, height: 14), 10)
-        for i in stride(from: 0, to: 9, by: 4) { // captions under 1x, 2x, 3x
-            view.addSubview(small("\(stages[i].formatted())x", NSRect(x: slider.frame.minX + slider.rectOfTickMark(at: i).midX - 15, y: 3, width: 30, height: 12), 9, .center))
+        // A row of boxes, one per scale, the current one selected. The resolution each gives is in its tooltip.
+        let avail = v?.avail ?? stages(forWidth: native.pixelWidth, mm: CGDisplayScreenSize(id).width) // see reconcile()
+        let current = v?.stage ?? (Double(native.pixelWidth) / Double(cur.width) * 4).rounded() / 4
+        let seg = NSSegmentedControl(labels: avail.map { "\($0.formatted())x" }, trackingMode: .selectOne, target: self, action: #selector(pick(_:)))
+        (seg.controlSize, seg.font, seg.segmentDistribution, seg.tag) = (.small, .monospacedDigitSystemFont(ofSize: 10, weight: .regular), .fillEqually, Int(id))
+        seg.frame = NSRect(x: 16, y: 4, width: 248, height: 22)
+        seg.setAccessibilityLabel("Scale")
+        for (i, s) in avail.enumerated() {
+            let (_, text, ok) = scaleOption(id, s)
+            seg.setToolTip(text, forSegment: i)
+            seg.setEnabled(ok, forSegment: i)
+            seg.setSelected(s == current, forSegment: i)
+            seg.setTag(Int(s * 100), forSegment: i) // stages are multiples of 0.25, so this is exact
         }
-        [icon, slider, value, detail].forEach(view.addSubview)
-        labels[id] = (value, detail)
+        let view = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 30))
+        view.addSubview(seg)
         let mi = NSMenuItem(); mi.view = view
         menu.addItem(mi)
 
@@ -107,23 +105,40 @@ extension App {
             .max { $0.refreshRate < $1.refreshRate }
     }
 
-    // Live label while dragging; switch only on release.
-    @objc func slide(_ slider: NSSlider) {
-        let id = CGDirectDisplayID(slider.tag), s = slider.doubleValue, k = displayKey(id)
-        guard let native = nativeMode(modes(id)) else { return }
-        let real = mode(id, scale: s), ext = CGDisplayIsBuiltin(id) == 0
-        labels[id]?.value.stringValue = "\(s.formatted())x"
-        labels[id]?.detail.stringValue = real.map(describe) ?? (!ext ? "not available on this display"
-            : allowVirtual ? virtualLabel(native, s)
-            : virtualSupported ? "needs the virtual display (off in Settings)" : "needs a virtual display (not supported on this macOS)")
-        guard NSApp.currentEvent?.type == .leftMouseUp else { return }
-        if let real {
-            UserDefaults.standard.removeObject(forKey: "virtual." + k)
-            teardown(k)
-            if real.ioDisplayModeID != CGDisplayCopyDisplayMode(id)?.ioDisplayModeID { configure { CGConfigureDisplayWithDisplayMode($0, id, real, nil) } }
-        } else if ext && allowVirtual {
-            UserDefaults.standard.set(s, forKey: "virtual." + k)
-            reconcile()
+    // What scale s does on display id: the real mode it uses (nil = virtual display), a description, and whether it can be picked.
+    func scaleOption(_ id: CGDirectDisplayID, _ s: Double) -> (real: CGDisplayMode?, text: String, ok: Bool) {
+        let v = virtuals[displayKey(id)]
+        guard let native = v?.panel ?? nativeMode(modes(id)) else { return (nil, "", false) }
+        // While mirrored the panel lists the virtual display's modes, not its own, so real modes can't be looked up.
+        if let v { return (nil, s == 1 ? describe(v.panel) : virtualLabel(native, s), true) }
+        if let real = mode(id, scale: s) { return (real, describe(real), true) }
+        if CGDisplayIsBuiltin(id) != 0 { return (nil, "not available on this display", false) }
+        if allowVirtual { return (nil, virtualLabel(native, s), true) }
+        return (nil, virtualSupported ? "needs the virtual display (off in Settings)" : "needs a virtual display (not supported on this macOS)", false)
+    }
+
+    @objc func pick(_ seg: NSSegmentedControl) {
+        let id = CGDirectDisplayID(seg.tag), k = displayKey(id)
+        guard seg.selectedSegment >= 0 else { return }
+        let s = Double(seg.tag(forSegment: seg.selectedSegment)) / 100
+        let (real, _, ok) = scaleOption(id, s)
+        guard ok else { return }
+        // cancelTracking only asks the menu to close; it's gone once the run loop is back in default mode. Switching
+        // modes under a still-open menu leaves it drawn at the old screen geometry.
+        item.menu?.cancelTracking()
+        RunLoop.main.perform(inModes: [.default]) { [self] in
+            if let real {
+                UserDefaults.standard.removeObject(forKey: "virtual." + k)
+                teardown(k)
+                if real.ioDisplayModeID != CGDisplayCopyDisplayMode(id)?.ioDisplayModeID { configure { CGConfigureDisplayWithDisplayMode($0, id, real, nil) } }
+            } else if virtuals[k] != nil && s == 1 {
+                UserDefaults.standard.removeObject(forKey: "virtual." + k)
+                teardown(k) // also puts the panel back on native
+                reconcile()
+            } else {
+                UserDefaults.standard.set(s, forKey: "virtual." + k)
+                reconcile()
+            }
         }
     }
 }

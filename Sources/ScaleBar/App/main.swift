@@ -3,6 +3,8 @@ import Cocoa
 // `ScaleBar --selftest`: checks the pure logic without touching any display.
 if CommandLine.arguments.contains("--selftest") {
     precondition(looks(2560, 1440, 1.5) == (1706, 960) && looks(2560, 1440, 1) == (2560, 1440) && looks(2560, 1440, 1.75) == (1462, 822))
+    precondition(stages(forWidth: 3840, mm: 531).last == 3 && stages(forWidth: 2560, mm: 708).last == 1.5 && stages(forWidth: 2560, mm: 597).last == 1.75)
+    precondition(stages(forWidth: 3840, mm: 0).last == 3 && stages(forWidth: 2560, mm: 0).last == 2 && stages(forWidth: 1024, mm: 0) == [1])
     precondition(ddcChecksum([0x82, 0x01, 0x10]) == 0x6E ^ 0x51 ^ 0x82 ^ 0x01 ^ 0x10)
     let reply: [UInt8] = [0x6E, 0x88, 0x02, 0x00, 0x10, 0x00, 0x00, 0x64, 0x00, 0x32, 0x00, 0x00]
     precondition(ddcParse(reply, 0x10)! == (50, 100) && ddcParse(Array(reply.dropFirst()) + [0], 0x10)! == (50, 100))

@@ -2,7 +2,7 @@
 
 |                                   | Needs                                                          |
 | --------------------------------- | -------------------------------------------------------------- |
-| Scale slider                      | macOS 14 or later                                              |
+| Scale list                        | macOS 14 or later                                              |
 | In-between sizes (1.25x, 1.5x, …) | macOS 14 or later                                              |
 | Brightness and volume             | Apple Silicon Mac, with DDC/CI turned on in the monitor's menu |
 | Keyboard keys                     | Accessibility permission, plus brightness and volume working   |
